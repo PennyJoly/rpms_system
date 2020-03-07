@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.PayTypeMapper">
+    <!--查询所有-->
+    <select id="findAll" resultType="PayType">
+        select * from paytype
+    </select>
+
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultType="PayType">
+        select * from paytype where id=#{id}
+    </select>
+
+    <!--添加-->
+    <insert id="save" parameterType="PayType">
+        insert into paytype(paytypename)
+        values(#{payTypeName})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="PayType">
+        update paytype set paytypename=#{payTypeName}
+         where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from paytype where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from paytype where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="payTypeQuery" resultType="long">
+        select count(id) from paytype
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="payTypeQuery" resultType="payType">
+        select * from paytype
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+    <!--高级的查询,判断是否传入来了name值-->
+    <sql id="sqlWhere">
+        <if test="payTypeName!=null and payTypeName!=''">
+            and paytypename like concat('%',#{payTypeName},'%')
+        </if>
+    </sql>
+</mapper>

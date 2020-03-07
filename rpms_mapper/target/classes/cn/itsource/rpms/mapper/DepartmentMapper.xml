@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.DepartmentMapper">
+    <!--查询所有-->
+    <select id="findAll" resultType="Department">
+        select * from t_department
+    </select>
+
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultType="Department">
+        select * from t_department where id=#{id}
+    </select>
+
+    <!--添加-->
+    <insert id="save" parameterType="Department">
+        insert into t_department(name) values(#{name})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="Department">
+        update t_department set name=#{name} where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from t_department where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from t_department where id in 
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="departmentQuery" resultType="long">
+        select count(id) from t_department
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="departmentQuery" resultType="department">
+        select * from t_department
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+    <!--高级查询,判断是否传入来了name值-->
+    <sql id="sqlWhere">
+        <if test="name!=null and name!=''">
+            and name like concat('%',#{name},'%')
+        </if>
+    </sql>
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.UserMapper">
+
+    <!--查询一条-->
+    <select id="findByUserName" parameterType="String" resultType="User">
+        select * from user where name=#{name}
+    </select>
+    <!--添加-->
+    <insert id="save" parameterType="User">
+        insert into user(name,password,imgUrl) values(#{name},#{password},#{imgUrl})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="User">
+        update user set name=#{name},password=#{password},imgUrl=#{imgUrl} where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from user where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from user where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="userQuery" resultType="long">
+        select count(id) from user
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="userQuery" resultType="user">
+        select * from user
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+    <!--高级查询,判断是否传入来了name值-->
+    <sql id="sqlWhere">
+        <if test="name!=null and name!=''">
+            and name like concat('%',#{name},'%')
+        </if>
+    </sql>
+</mapper>

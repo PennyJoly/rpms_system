@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.RepairPersonMapper">
+    <!--查询所有-->
+    <select id="findAll" resultType="RepairPerson">
+        select * from repairperson
+    </select>
+
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultType="RepairPerson">
+        select * from repairperson where id=#{id}
+    </select>
+
+    <!--添加-->
+    <insert id="save" parameterType="RepairPerson">
+        insert into repairperson(optname,age,email,hiredate)
+        values(#{optName},#{age},#{email},#{hireDate})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="RepairPerson">
+        update repairperson set optname=#{optName},age=#{age},email=#{email},hiredate=#{hireDate}
+         where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from repairperson where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from repairperson where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="repairPersonQuery" resultType="long">
+        select count(id) from repairperson
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="repairPersonQuery" resultType="repairPerson">
+        select * from repairperson
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+    <!--高级查询,判断是否传入来了name值-->
+    <sql id="sqlWhere">
+        <if test="optName!=null and optName!=''">
+            and optname like concat('%',#{optName},'%')
+        </if>
+    </sql>
+</mapper>

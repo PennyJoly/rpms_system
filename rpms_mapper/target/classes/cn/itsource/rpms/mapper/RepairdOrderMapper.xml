@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.RepairdOrderMapper">
+    <!--查询所有-->
+    <select id="findAll" resultMap="repairdOrderMap">
+        select * from repairdOrder
+    </select>
+
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultMap="repairdOrderMap">
+        select * from repairdOrder where id=#{id}
+    </select>
+
+    <!--添加-->
+    <insert id="save" parameterType="RepairdOrder" useGeneratedKeys="true" keyColumn="id" keyProperty="long">
+        insert into repairdOrder(custormer,carnum,status,createtime,address,optid)
+        values(#{custormer},#{carNum},#{status},#{createTime},#{address},#{repairPerson.id})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="RepairdOrder">
+        update repairdOrder set custormer=#{custormer},
+        carNum=#{carNum},status=#{status},
+         address=#{address},optid=#{repairPerson.id}
+        where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from repairdOrder where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from repairdOrder where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="repairdOrderQuery" resultType="long">
+        select count(id) from repairdOrder
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="repairdOrderQuery" resultMap="repairdOrderMap">
+        select * from repairdOrder
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+    <!--高级查询,判断是否传入来了carNum值-->
+    <sql id="sqlWhere">
+        <if test="carNum!=null and carNum!=''">
+            and carNum like concat('%',#{carNum},'%')
+        </if>
+    </sql>
+    
+    <resultMap id="repairdOrderMap" type="repairdOrder">
+        <id column="id" property="id"/>
+        <result column="custormer" property="custormer"/>
+        <result column="carnum" property="carNum"/>
+        <result column="createtime" property="createTime"/>
+        <result column="status" property="status"/>
+        <result column="address" property="address"/>
+        <!--对repaitPerson一方处理-->
+        <association column="optid" property="repairPerson" javaType="cn.itsource.rpms.common.domain.RepairPerson"
+        select="findRepairPersonById">
+        </association>
+
+        <!--对repairdOrderItems多方处理-->
+        <collection property="repairdOrderItems" column="id" select="cn.itsource.rpms.mapper.RepairdOrderItemsMapper.findOne"
+        ofType="cn.itsource.rpms.common.domain.RepairdOrderItems">
+        </collection>
+    </resultMap>
+
+    <!--嵌套查询维修员-->
+    <select id="findRepairPersonById" parameterType="long"
+            resultType="cn.itsource.rpms.common.domain.RepairPerson">
+        select * from repairperson where id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,9 @@
+cn\itsource\rpms\mapper\SettledOrderWsMapper.class
+cn\itsource\rpms\mapper\PayTypeMapper.class
+cn\itsource\rpms\mapper\RepairPersonMapper.class
+cn\itsource\rpms\mapper\UserMapper.class
+cn\itsource\rpms\mapper\RepairdOrderMapper.class
+cn\itsource\rpms\mapper\DepartmentMapper.class
+cn\itsource\rpms\mapper\RepairdOrderItemsMapper.class
+cn\itsource\rpms\mapper\PartsMapper.class
+cn\itsource\rpms\mapper\SettledOrderMapper.class

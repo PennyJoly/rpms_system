@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <!--session管理器-->
+    <bean id="sessionManager" class="cn.itsource.shiro.utils.RpmsSessionManager"/>
+
+    <!--shiro的核心对象 realm-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="sessionManager" ref="sessionManager"/>
+        <!--配置realm-->
+        <property name="realm" ref="authRealm"/>
+    </bean>
+
+    <!--Realms-->
+    <bean id="authRealm" class="cn.itsource.shiro.realm.AuthenRealm">
+        <property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+                <property name="hashAlgorithmName" value="MD5"/>
+                <property name="hashIterations" value="10"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!--自定义过滤器-->
+    <bean id="myAuthc" class="cn.itsource.shiro.utils.MyAuthenticationFilter"/>
+
+    <!--shiro的过滤器配置 web.xml的代理过滤器名称一样-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/login"/>
+        <property name="successUrl" value="/"/>
+        <property name="unauthorizedUrl" value="/s/unauthorized"/>
+        <property name="filters">
+            <map>
+                <entry key="myAuthc" value-ref="myAuthc"/>
+            </map>
+        </property>
+        <property name="filterChainDefinitions">
+            <value>
+                /login = anon
+                /** = myAuthc
+
+            </value>
+        </property>
+    </bean>
+</beans>

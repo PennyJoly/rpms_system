@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.RepairdOrderItemsMapper">
+    <!--查询所有-->
+    <select id="findAll" resultMap="repairdOrderItemsMap">
+        select * from repairdOrderItems
+    </select>
+
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultMap="repairdOrderItemsMap">
+        select * from repairdOrderItems where id=#{id}
+    </select>
+
+    <!--添加-->
+    <insert id="save" parameterType="RepairdOrderItems" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into repairdOrderItems(amt1,amt2,num,totalamt,mainid,optid,pid)
+        values(#{amt1},#{amt2},#{num},#{totalAmt},#{mainId},#{repairPerson.id},#{parts.id})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="RepairdOrderItems">
+        update repairdOrderItems set amt1=#{amt1},
+        amt2=#{amt2},num=#{num},totalamt=#{totalAmt},
+         mainid=#{mainId},optid=#{repairPerson.id},
+         pid=#{parts.id}
+        where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from repairdOrderItems where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from repairdOrderItems where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="repairdOrderItemsQuery" resultType="long">
+        select count(id) from repairdOrderItems
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="repairdOrderItemsQuery" resultMap="repairdOrderItemsMap">
+        select * from repairdOrderItems
+        where mainid=#{mainId}
+        order by totalamt
+        LIMIT #{start},#{pageSize}
+    </select>
+    <resultMap id="repairdOrderItemsMap" type="repairdOrderItems">
+        <id column="id" property="id"/>
+        <result column="mainid" property="mainId"/>
+        <result column="amt1" property="amt1"/>
+        <result column="amt2" property="amt2"/>
+        <result column="num" property="num"/>
+        <result column="totalamt" property="totalAmt"/>
+
+        <!--对repaitPerson一方处理-->
+        <association column="optid" property="repairPerson" javaType="cn.itsource.rpms.common.domain.RepairPerson"
+                     select="findRepairPersonById">
+        </association>
+        <!--对parts一方处理-->
+        <association property="parts" javaType="cn.itsource.rpms.common.domain.Parts" column="pid"
+                     select="findPartsById">
+        </association>
+    </resultMap>
+
+    <!--嵌套查询维修员-->
+    <select id="findRepairPersonById" parameterType="long"
+            resultType="cn.itsource.rpms.common.domain.RepairPerson">
+        select * from repairperson where id = #{id}
+    </select>
+
+    <!--嵌套查询配件-->
+    <select id="findPartsById" parameterType="long"
+            resultType="cn.itsource.rpms.common.domain.Parts">
+        select * from parts where id = #{id}
+    </select>
+
+    <!--根据 维修单号 mainId，删除关联的明细-->
+    <delete id="removeByMainId" parameterType="long">
+        delete from repairdorderitems where mainid = #{mainid}
+    </delete>
+
+</mapper>

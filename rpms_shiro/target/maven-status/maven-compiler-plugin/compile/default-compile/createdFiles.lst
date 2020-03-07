@@ -1,0 +1,4 @@
+cn\itsource\shiro\utils\RpmsSessionManager.class
+cn\itsource\shiro\utils\UserContext.class
+cn\itsource\shiro\realm\AuthenRealm.class
+cn\itsource\shiro\utils\MyAuthenticationFilter.class

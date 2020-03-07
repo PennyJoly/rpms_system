@@ -1,0 +1,5 @@
+cn\itsource\basic\domain\BaseDomain.class
+cn\itsource\basic\service\IBaseService.class
+cn\itsource\basic\service\impl\BaseServiceImpl.class
+cn\itsource\basic\mapper\BaseMapper.class
+cn\itsource\basic\query\BaseQuery.class

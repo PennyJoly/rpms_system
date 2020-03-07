@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.RoleMapper">
+    <!--查询所有-->
+    <select id="findAll" resultType="Role">
+        select * from role
+    </select>
+    <select id="findAllRole" resultMap="permissionMap">
+       select r.id,r.name,r.sn, p.id pid,p.name pname,p.sn psn from role r join  role_permission rp on r.id = rp.role_id join permission p on p.id = rp.permission_id
+    </select>
+    <resultMap id="permissionMap" type="role">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="sn" property="sn"></result>
+        <collection property="permissions" javaType="permission">
+            <id column="pid" property="id"></id>
+            <result column="pname" property="name"></result>
+            <result column="psn" property="sn"></result>
+        </collection>
+    </resultMap>
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultType="Role">
+        select * from role where id=#{id}
+    </select>
+
+    <!--添加-->
+    <insert id="save" parameterType="Role" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        insert into role(name,sn) values(#{name},#{sn})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="Role">
+        update role set name=#{name} where id=#{id}
+    </update>
+    <!--保存中间表方法  list-->
+    <insert id="saveRolePermission" parameterType="arrayList">
+        insert into role_permission(role_id,permission_id) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.roleId},#{item.permissionId})
+        </foreach>
+    </insert>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from role where id=#{id}
+    </delete>
+    <!--删除中间表-->
+    <delete id="deleteRolePermission" parameterType="long">
+        delete from role_permission where role_id=#{roleid}
+    </delete>
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from role where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="RoleQuery" resultType="long">
+        select count(*) from role r
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="RoleQuery" resultMap="RoleMap">
+        select
+        distinct
+        r.id ,
+        r.name,
+        r.sn
+        from role r
+        left join role_permission rp on r.id = rp.role_id
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+    <resultMap id="RoleMap" type="Role">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="sn" column="sn"></result>
+        <collection property="permissions" ofType="Permission"  column="id" select="queryPermissionsByRoleid" >
+
+        </collection>
+    </resultMap>
+
+    <select id="queryPermissionsByRoleid" parameterType="long" resultMap="PermissionMap">
+        select p.id pid,p.name pname, p.sn psn
+        from role_permission rp
+        join permission p on p.id = rp.permission_id
+        where rp.role_id = #{id}
+</select>
+
+    <resultMap id="PermissionMap" type="Permission">
+        <id property="id" column="pid"></id>
+        <result property="name" column="pname" ></result>
+        <result property="sn"  column="psn"></result>
+    </resultMap>
+    <!--高级查询,判断是否传入来了name值-->
+    <sql id="sqlWhere">
+        <if test="name!=null and name!=''">
+            and r.name like concat('%',#{name},'%')
+        </if>
+    </sql>
+</mapper>

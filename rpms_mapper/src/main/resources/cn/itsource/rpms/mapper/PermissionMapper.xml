@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.PermissionMapper">
+    <resultMap id="permissionMap" type="Permission">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="sn" property="sn"></result>
+        <!--处理一方-->
+        <association property="mn" javaType="Menu">
+            <id column="mid" property="id"></id>
+            <result column="msn" property="sn"></result>
+            <result column="mname" property="name"></result>
+            <result column="icon" property="icon"></result>
+            <result column="url" property="url"></result>
+            <result column="parent_id" property="parent_id"></result>
+            <result column="intro" property="intro"></result>
+        </association>
+    </resultMap>
+    <!--查询所有-->
+    <select id="findAll" resultType="permission">
+        select * from permission
+    </select>
+
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultType="Permission">
+          select
+            p.id,
+            p.name,
+            p.sn,
+            mn.id mid,
+            mn.sn msn,
+            mn.name mname,
+            mn.icon,
+            mn.url,
+            mn.parent_id,
+            mn.intro
+        from permission p join menu mn on p.menu_id=mn.id where id=#{id}
+    </select>
+
+    <!--查询menu对应的-->
+    <select id="finds" parameterType="long" resultType="Permission">
+         select * from permission where menu_id=#{id}
+    </select>
+    <!--添加-->
+    <insert id="save" parameterType="Permission">
+        insert into permission(name,sn,menu_id) values(#{name},#{sn},#{mn.id})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="Permission">
+        update permission set name=#{name},sn=#{sn},menu_id=#{mn.id} where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from permission where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from permission where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="PermissionQuery" resultType="long">
+        select count(*) from permission
+
+            <where>
+                <if test="name!=null and name!=''">
+                    and name like concat('%',#{name},'%')
+                </if>
+            </where>
+
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="PermissionQuery" resultMap="permissionMap">
+        select
+        p.id,
+        p.name,
+        p.sn,
+        mn.id mid,
+        mn.sn msn,
+        mn.name mname,
+        mn.icon,
+        mn.url,
+        mn.parent_id,
+        mn.intro
+        from permission p left join menu mn on p.menu_id=mn.id
+        <where>
+            <if test="name!=null and name!=''">
+                and p.name like concat('%',#{name},'%')
+            </if>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+
+    <!--
+            查询role 对应的permission
+    -->
+    <select id="roleFindpermission" parameterType="long" resultType="permission">
+        SELECT p.`name` FROM permission p JOIN role_permission rp ON p.id=rp.permission_id JOIN role r ON r.id=rp.role_id WHERE r.id=#{id}
+    </select>
+</mapper>

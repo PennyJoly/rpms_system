@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.SettledOrderMapper">
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultType="SettledOrder">
+        select * from settledorder
+    </select>
+
+    <!--添加-->
+    <insert id="save" parameterType="SettledOrder" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into settledOrder(custormer,re_amount,settedTime,pay_amout,address,mainid,payid)
+        values(#{custormer},#{re_amount},#{settedTime},#{pay_amout},#{address},#{main.id},#{pay.id});
+    </insert>
+    <!--更新状态-->
+    <update id="updateStatus" parameterType="SettledOrder">
+        update repairdorder set status=#{main.status} where id=#{main.id}
+    </update>
+    <!--修改-->
+    <update id="update" parameterType="SettledOrder">
+        update settledorder set name=#{name} where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from settledorder where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from settledorder where id in 
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="settledOrderQuery" resultType="long">
+        select count(id) from settledorder s
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+    </select>
+
+    <!--查询所有-->
+    <resultMap id="settledOrderMap" type="settledOrder">
+        <id property="id" column="id"/>
+        <result property="custormer" column="custormer"/>
+        <result property="re_amount" column="re_amount"/>
+        <result property="pay_amout" column="pay_amout"/>
+        <result property="settedTime" column="settedtime"/>
+        <result property="address" column="address"/>
+        <association property="pay" javaType="PayType">
+            <id property="id" column="pay_id"/>
+            <result property="payTypeName" column="paytypename"/>
+        </association>
+        <association property="main" javaType="RepairdOrder">
+            <id property="id" column="main_id"/>
+        </association>
+    </resultMap>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="settledOrderQuery" resultMap="settledOrderMap">
+        select s.id,p.id pay_id,r.id main_id,s.custormer,s.re_amount,s.pay_amout,p.paytypename,s.settedtime,s.address
+        from settledorder s join  paytype p on s.payid = p.id JOIN repairdorder r ON s.mainid = r.id
+        <where>
+            <if test="custormer!=null and custormer!=''">
+                and s.custormer like concat('%',#{custormer},'%')
+            </if>
+            <if test="status == true">
+                and r.status = 1
+            </if>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+    <!--高级查询,判断是否传入来了name值-->
+    <sql id="sqlWhere">
+        <if test="custormer!=null and custormer!=''">
+            and s.custormer like concat('%',#{custormer},'%')
+        </if>
+    </sql>
+</mapper>

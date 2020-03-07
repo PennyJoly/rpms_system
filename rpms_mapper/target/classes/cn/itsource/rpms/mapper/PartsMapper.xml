@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itsource.rpms.mapper.PartsMapper">
+    <!--查询所有-->
+    <select id="findAll" resultType="Parts">
+        select * from parts
+    </select>
+
+    <!--查询一条-->
+    <select id="findOne" parameterType="long" resultType="Parts">
+        select * from parts where id=#{id}
+    </select>
+
+    <!--添加-->
+    <insert id="save" parameterType="Parts">
+        insert into parts(partsname,price,num,warnnum,context,createtime)
+        values(#{partsName},#{price},#{num},#{warnNum},#{context},#{createTime})
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="Parts">
+        update parts set partsname=#{partsName},
+         price=#{price}, num=#{num}, warnnum=#{warnNum}, context=#{context},createtime=#{createTime}
+         where id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="long">
+        delete from parts where id=#{id}
+    </delete>
+
+    <!--批量删除-->
+    <delete id="batchDelete">
+        delete from parts where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--查询总页数
+    记住需要添加where条件
+    -->
+    <select id="queryCount" parameterType="partsQuery" resultType="long">
+        select count(id) from parts
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+    </select>
+    <!--查询pageList-->
+    <select id="queryData" parameterType="partsQuery" resultType="parts">
+        select * from parts
+        <where>
+            <include refid="sqlWhere"></include>
+        </where>
+        LIMIT #{start},#{pageSize}
+    </select>
+    <!--高级查询,判断是否传入来了name值-->
+    <sql id="sqlWhere">
+        <if test="partsName!=null and partsName!=''">
+            and partsname like concat('%',#{partsName},'%')
+        </if>
+    </sql>
+</mapper>
